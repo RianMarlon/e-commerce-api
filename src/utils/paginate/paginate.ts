@@ -5,6 +5,9 @@ import {
   IPaginationMetadata,
   IPagination,
 } from './interfaces/pagination-interface';
+import { IPaginationConfig } from './interfaces/pagination-config-interface';
+
+import { camelCaseToSnakeCase } from '../camel-case-to-snake-case';
 
 const tableName = (alias: string, path: string): string => {
   return `${alias}_${path.replace('.', '_')}`;
@@ -24,8 +27,10 @@ const tableWithField = (alias: string, path: string): string => {
 export async function paginate<Entity>(
   repository: Repository<Entity> | SelectQueryBuilder<Entity>,
   paginationOptions: IPaginationOptions<Entity>,
+  paginationConfig: IPaginationConfig,
 ): Promise<IPagination<Entity>> {
-  const { limit, page, where, relations } = paginationOptions;
+  const { limit, page, where, relations, sortBy } = paginationOptions;
+  const { sortableColumns, defaultSortBy } = paginationConfig;
   let queryBuilder: SelectQueryBuilder<Entity>;
 
   if (repository instanceof Repository) {
@@ -45,6 +50,36 @@ export async function paginate<Entity>(
         tableName(queryBuilder.alias, relation),
       );
     });
+  }
+
+  if (defaultSortBy) {
+    for (const key of Object.keys(defaultSortBy)) {
+      const tableWithFieldAlias = tableWithField(queryBuilder.alias, key);
+      const tableWithFieldInSnakeCaseAlias =
+        camelCaseToSnakeCase(tableWithFieldAlias);
+
+      queryBuilder.addOrderBy(
+        tableWithFieldInSnakeCaseAlias,
+        defaultSortBy[key],
+      );
+    }
+  }
+
+  if (sortBy) {
+    for (const key of Object.keys(sortBy)) {
+      const isSortableColumn = sortableColumns.find(
+        (column) =>
+          column === key && (sortBy[key] === 'DESC' || sortBy[key] === 'ASC'),
+      );
+
+      if (isSortableColumn) {
+        const tableWithFieldAlias = tableWithField(queryBuilder.alias, key);
+        const tableWithFieldAliasInSnakeCase =
+          camelCaseToSnakeCase(tableWithFieldAlias);
+
+        queryBuilder.addOrderBy(tableWithFieldAliasInSnakeCase, sortBy[key]);
+      }
+    }
   }
 
   if (where) {
