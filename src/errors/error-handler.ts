@@ -1,7 +1,12 @@
-import { Request, Response } from 'express';
+import { NextFunction, Request, Response } from 'express';
 
 export class ErrorHandler {
-  handleError(error: any, _request: Request, response: Response) {
+  handleError(
+    error: any,
+    _request: Request,
+    response: Response,
+    _next: NextFunction,
+  ) {
     if (error.statusCode) {
       return response.status(error.statusCode).json({
         statusCode: error.statusCode,
