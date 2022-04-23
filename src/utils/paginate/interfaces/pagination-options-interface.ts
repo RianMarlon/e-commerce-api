@@ -1,8 +1,9 @@
-import { IWhere } from '../../where/interfaces/where.interface';
+import { FindConditions } from 'typeorm';
 
 export interface IPaginationOptions<Entity> {
   page: number | string;
   limit: number | string;
-  where?: IWhere<Entity>;
+  where?: FindConditions<Entity>[] | FindConditions<Entity>;
+  sortBy?: { [column: string]: 'DESC' | 'ASC' };
   relations?: string[];
 }
