@@ -1,0 +1,17 @@
+{
+  "openapi": "3.0.0",
+  "info": {
+    "title": "E-Commerce API",
+    "description": "O E-Commerce API tem o intuito de simular o funcionamento de um e-commerce",
+    "contact": {
+      "email": "rianmarlon95@gmail.com"
+    },
+    "version": "1.0.0"
+  },
+  "servers": [
+    {
+      "url": "http://localhost:3000/",
+      "description": "API de teste"
+    }
+  ]
+}
