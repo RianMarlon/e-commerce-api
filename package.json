@@ -5,8 +5,8 @@
   "author": "Rian Marlon Sousa da Silva <rianmarlon95@gmail.com>",
   "license": "MIT",
   "scripts": {
-    "start": "yarn build && node ./dist/server.js",
-    "start:dev": "yarn build && tsnd --transpile-only --respawn --ignore-watch node_modules dist/server.js",
+    "start": "node ./dist/server.js",
+    "start:dev": "tsnd --transpile-only --respawn --ignore-watch node_modules src/server.ts",
     "build": "tsc",
     "typeorm": "node ./node_modules/typeorm/cli.js"
   },
