@@ -13,5 +13,410 @@
       "url": "http://localhost:3000/",
       "description": "API de teste"
     }
-  ]
+  ],
+  "paths": {
+    "/employees": {
+      "get": {
+        "summary": "Listar funcionários",
+        "description": "Listar funcionários",
+        "tags": ["Employees"],
+        "responses": {
+          "200": {
+            "description": "Lista de funcionários",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PaginationEmployees"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "summary": "Cadastrar um novo funcionário",
+        "description": "Cadastrar um novo funcionário",
+        "tags": ["Employees"],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateEmployeeDTO"
+              }
+            }
+          }
+        },
+        "responses": {
+          "400": {
+            "description": "Campos inválidos ou funcionário já existe",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error400"
+                }
+              }
+            }
+          },
+          "201": {
+            "description": "Funcionário cadastrado",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ReturnEmployeeDTO"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/employees/{id}": {
+      "get": {
+        "summary": "Buscar funcionário por id",
+        "description": "Buscar funcionário por id",
+        "tags": ["Employees"],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "ID do funcionário",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "404": {
+            "description": "Funcionário não existe",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error404"
+                }
+              }
+            }
+          },
+          "200": {
+            "description": "Funcionário encontrado",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ReturnEmployeeDTO"
+                }
+              }
+            }
+          }
+        }
+      },
+      "put": {
+        "summary": "Atualizar um funcionário",
+        "description": "Atualizar um funcionário",
+        "tags": ["Employees"],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "ID do funcionário",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateEmployeeDTO"
+              }
+            }
+          }
+        },
+        "responses": {
+          "400": {
+            "description": "Campos inválidos ou existe um funcionário com o novo CPF/E-mail informado",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error400"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Funcionário não existe",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error404"
+                }
+              }
+            }
+          },
+          "200": {
+            "description": "Funcionário atualizado",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ReturnEmployeeDTO"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "summary": "Deletar um funcionário",
+        "description": "Deletar um funcionário",
+        "tags": ["Employees"],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "ID do funcionário",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "404": {
+            "description": "Funcionário não existe",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error404"
+                }
+              }
+            }
+          },
+          "200": {
+            "description": "Funcionário deletado",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SuccessResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/types-employee": {
+      "get": {
+        "summary": "Listar todos os tipos de funcionário",
+        "description": "Listar todos os tipos de funcionário",
+        "tags": ["Employees"],
+        "responses": {
+          "200": {
+            "description": "Lista de tipos de funcionário",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "ReturnEmployeeDTO": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "name": {
+            "type": "string",
+            "minLength": "1",
+            "maxLength": "100"
+          },
+          "type": {
+            "$ref": "#/components/schemas/TypesEmployee"
+          },
+          "email": {
+            "type": "string",
+            "format": "email"
+          },
+          "cpf": {
+            "type": "string",
+            "pattern": "^[0-9]{11}$"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        },
+        "required": [
+          "id",
+          "name",
+          "type",
+          "email",
+          "cpf",
+          "createdAt",
+          "updatedAt"
+        ]
+      },
+      "CreateEmployeeDTO": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "minLength": "1",
+            "maxLength": "100"
+          },
+          "type": {
+            "$ref": "#/components/schemas/TypesEmployee"
+          },
+          "email": {
+            "type": "string",
+            "format": "email"
+          },
+          "cpf": {
+            "type": "string",
+            "pattern": "^([0-9]{3}\\.[0-9]{3}\\.[0-9]{3}\\-[0-9]{2})|([0-9]{11})$"
+          },
+          "password": {
+            "type": "string",
+            "format": "password",
+            "minLength": "8",
+            "maxLength": "30"
+          }
+        },
+        "required": ["name", "type", "email", "cpf", "password"]
+      },
+      "UpdateEmployeeDTO": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "minLength": "1",
+            "maxLength": "100"
+          },
+          "type": {
+            "$ref": "#/components/schemas/TypesEmployee"
+          },
+          "email": {
+            "type": "string",
+            "format": "email"
+          },
+          "cpf": {
+            "type": "string",
+            "pattern": "^([0-9]{3}\\.[0-9]{3}\\.[0-9]{3}\\-[0-9]{2})|([0-9]{11})$"
+          },
+          "password": {
+            "type": "string",
+            "format": "password",
+            "minLength": "8",
+            "maxLength": "30"
+          }
+        },
+        "required": ["password"]
+      },
+      "PaginationEmployees": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ReturnEmployeeDTO"
+            }
+          },
+          "metadata": {
+            "type": "object",
+            "properties": {
+              "totalItems": {
+                "type": "integer"
+              },
+              "totalPages": {
+                "type": "integer"
+              },
+              "currentPage": {
+                "type": "integer"
+              },
+              "itemsPerPage": {
+                "type": "integer"
+              },
+              "quantityItemsReturned": {
+                "type": "integer"
+              }
+            },
+            "required": [
+              "totalItems",
+              "totalPages",
+              "currentPage",
+              "itemsPerPage",
+              "quantityItemsReturned"
+            ]
+          }
+        },
+        "required": ["items", "metadata"]
+      },
+      "TypesEmployee": {
+        "type": "string",
+        "enum": ["ADMINISTRATOR", "MODERATOR", "SUPPORT"]
+      },
+      "SuccessResponse": {
+        "type": "object",
+        "properties": {
+          "message": {
+            "type": "string"
+          }
+        },
+        "required": ["message"]
+      },
+      "Error400": {
+        "type": "object",
+        "properties": {
+          "statusCode": {
+            "type": "integer",
+            "minimum": 400,
+            "maximum": 400
+          },
+          "message": {
+            "type": "string"
+          },
+          "badFields": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        },
+        "required": ["statusCode", "message"]
+      },
+      "Error404": {
+        "type": "object",
+        "properties": {
+          "statusCode": {
+            "type": "integer",
+            "minimum": 404,
+            "maximum": 404
+          },
+          "message": {
+            "type": "string"
+          }
+        },
+        "required": ["statusCode", "message"]
+      }
+    }
+  }
 }
