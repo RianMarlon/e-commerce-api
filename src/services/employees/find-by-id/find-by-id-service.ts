@@ -1,17 +1,16 @@
-import { getCustomRepository } from 'typeorm';
-
 import { AppError } from '../../../errors/app-error';
 
-import { EmployeesRepository } from '../../../repositories/employees-repository';
+import { IFindEmployeeByIdRepository } from '../../../repositories/employees/find-by-id/find-by-id-repository-interface';
 
 import { ReturnEmployeeDTO } from '../dto/return-dto';
 
-export class FindByIdEmployeeService {
+export class FindEmployeeByIdService {
+  constructor(
+    private readonly findEmployeeByIdRepository: IFindEmployeeByIdRepository,
+  ) {}
+
   async execute(id: string) {
-    const employeesRepository = getCustomRepository(EmployeesRepository);
-    const employeeById = await employeesRepository.findOne({
-      id,
-    });
+    const employeeById = await this.findEmployeeByIdRepository.execute(id);
 
     if (!employeeById) {
       throw new AppError('Employee not exists', 404);

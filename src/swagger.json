@@ -207,28 +207,6 @@
           }
         }
       }
-    },
-    "/types-employee": {
-      "get": {
-        "summary": "Listar todos os tipos de funcionário",
-        "description": "Listar todos os tipos de funcionário",
-        "tags": ["Employees"],
-        "responses": {
-          "200": {
-            "description": "Lista de tipos de funcionário",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "array",
-                  "items": {
-                    "type": "string"
-                  }
-                }
-              }
-            }
-          }
-        }
-      }
     }
   },
   "components": {
