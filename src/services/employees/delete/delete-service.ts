@@ -1,20 +1,21 @@
-import { getCustomRepository } from 'typeorm';
-
 import { AppError } from '../../../errors/app-error';
 
-import { EmployeesRepository } from '../../../repositories/employees-repository';
+import { IDeleteEmployeeRepository } from '../../../repositories/employees/delete/delete-repository-interface';
+import { IFindEmployeeByIdRepository } from '../../../repositories/employees/find-by-id/find-by-id-repository-interface';
 
 export class DeleteEmployeeService {
-  async execute(id: string): Promise<void> {
-    const employeesRepository = getCustomRepository(EmployeesRepository);
-    const userById = await employeesRepository.findOne({
-      id,
-    });
+  constructor(
+    private readonly findEmployeeByIdRepository: IFindEmployeeByIdRepository,
+    private readonly deleteEmployeeRepository: IDeleteEmployeeRepository,
+  ) {}
 
-    if (!userById) {
-      throw new AppError('User not exists', 404);
+  async execute(id: string): Promise<void> {
+    const employeeById = await this.findEmployeeByIdRepository.execute(id);
+
+    if (!employeeById) {
+      throw new AppError('Employee not exists', 404);
     }
 
-    await employeesRepository.remove(userById);
+    await this.deleteEmployeeRepository.execute(id);
   }
 }

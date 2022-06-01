@@ -1,5 +1,11 @@
-import { FindByIdEmployeeService } from './find-by-id-service';
+import { FindEmployeeByIdRepositoryTypeORM } from '../../../repositories/employees/find-by-id/clients/find-by-id-repository-typeorm';
 
-const findByIdEmployeeService = new FindByIdEmployeeService();
+import { FindEmployeeByIdService } from './find-by-id-service';
 
-export { findByIdEmployeeService };
+const findEmployeeByIdRepository = new FindEmployeeByIdRepositoryTypeORM();
+
+const findEmployeeByIdService = new FindEmployeeByIdService(
+  findEmployeeByIdRepository,
+);
+
+export { findEmployeeByIdService };

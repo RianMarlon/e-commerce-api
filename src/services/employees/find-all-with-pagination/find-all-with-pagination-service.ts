@@ -1,15 +1,16 @@
-import { getCustomRepository } from 'typeorm';
-
 import { DataValidator } from '../../../utils/data-validator/data-validator';
 import { PaginationParamsDTO } from '../../../utils/paginate/dto/pagination-params-dto';
 import { IPagination } from '../../../utils/paginate/interfaces/pagination-interface';
 
-import { EmployeesRepository } from '../../../repositories/employees-repository';
+import { IFindAllEmployeesWithPaginationRepository } from '../../../repositories/employees/find-all-with-pagination/find-all-with-pagination-repository-interface';
 
 import { ReturnEmployeeDTO } from '../dto/return-dto';
 
-export class FindAllEmployeesService {
-  constructor(private readonly dataValidator: DataValidator) {}
+export class FindAllEmployeesWithPaginationService {
+  constructor(
+    private readonly dataValidator: DataValidator,
+    private readonly findAllEmployeesWithPaginationRepository: IFindAllEmployeesWithPaginationRepository,
+  ) {}
 
   async execute(
     paginationParams: PaginationParamsDTO,
@@ -19,16 +20,15 @@ export class FindAllEmployeesService {
       PaginationParamsDTO,
     );
 
-    const employeesRepository = getCustomRepository(EmployeesRepository);
-
-    const employees = await employeesRepository.findAllWithPagination({
-      limit: paginationOptionsWithDTO.limit,
-      page: paginationOptionsWithDTO.page,
-      sortBy: {
-        createdAt: 'DESC',
-        updatedAt: 'DESC',
-      },
-    });
+    const employees =
+      await this.findAllEmployeesWithPaginationRepository.execute({
+        limit: paginationOptionsWithDTO.limit,
+        page: paginationOptionsWithDTO.page,
+        sortBy: {
+          createdAt: 'DESC',
+          updatedAt: 'DESC',
+        },
+      });
 
     const items = employees.items.map((employee) => {
       return new ReturnEmployeeDTO(

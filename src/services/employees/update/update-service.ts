@@ -1,17 +1,25 @@
-import { getCustomRepository, Not } from 'typeorm';
-
 import { AppError } from '../../../errors/app-error';
-import { DataValidator } from '../../../utils/data-validator/data-validator';
-import { compareDataWithHash } from '../../../utils/encrypt/encrypt';
-import { withoutCharacters } from '../../../utils/without-characters';
 
-import { EmployeesRepository } from '../../../repositories/employees-repository';
+import { DataValidator } from '../../../utils/data-validator/data-validator';
+import { IEncryptor } from '../../../utils/encryptor/interfaces/encryptor-interface';
+
+import { IFindEmployeeByEmailRepository } from '../../../repositories/employees/find-by-email/find-by-email-repository-interface';
+import { IFindEmployeeByCPFRepository } from '../../../repositories/employees/find-by-cpf/find-by-cpf-repository-interface';
+import { IFindEmployeeByIdRepository } from '../../../repositories/employees/find-by-id/find-by-id-repository-interface';
+import { IUpdateEmployeeRepository } from '../../../repositories/employees/update/update-repository-interface';
 
 import { ReturnEmployeeDTO } from '../dto/return-dto';
 import { UpdateEmployeeDTO } from './dto/update-dto';
 
 export class UpdateEmployeeService {
-  constructor(private readonly dataValidator: DataValidator) {}
+  constructor(
+    private readonly dataValidator: DataValidator,
+    private readonly encryptor: IEncryptor,
+    private readonly findEmployeeByIdRepository: IFindEmployeeByIdRepository,
+    private readonly findEmployeeByEmailRepository: IFindEmployeeByEmailRepository,
+    private readonly findEmployeeByCPFRepository: IFindEmployeeByCPFRepository,
+    private readonly updateEmployeeRepository: IUpdateEmployeeRepository,
+  ) {}
 
   async execute(
     id: string,
@@ -22,16 +30,13 @@ export class UpdateEmployeeService {
       UpdateEmployeeDTO,
     );
 
-    const employeesRepository = getCustomRepository(EmployeesRepository);
-    const employeeById = await employeesRepository.findOne({
-      id,
-    });
+    const employeeById = await this.findEmployeeByIdRepository.execute(id);
 
     if (!employeeById) {
       throw new AppError('Employee not exists', 404);
     }
 
-    const passwordIsValid = await compareDataWithHash(
+    const passwordIsValid = await this.encryptor.compareDataWithHash(
       employeeToUpdate.password,
       employeeById.password,
     );
@@ -45,37 +50,29 @@ export class UpdateEmployeeService {
       ...employeeToUpdate,
     };
 
-    newEmployee.email = newEmployee.email.toLowerCase();
-    newEmployee.cpf = withoutCharacters(newEmployee.cpf);
+    const employeeByEmail = await this.findEmployeeByEmailRepository.execute(
+      newEmployee.email,
+    );
 
-    const employeeByEmail = await employeesRepository.findOne({
-      id: Not(id),
-      email: newEmployee.email,
-    });
-
-    if (employeeByEmail) {
+    if (employeeByEmail && employeeByEmail.id != employeeById.id) {
       throw new AppError('Already exists an employee with this email', 400);
     }
 
-    const employeeByCpf = await employeesRepository.findOne({
-      id: Not(id),
-      email: newEmployee.cpf,
-    });
+    const employeeByCPF = await this.findEmployeeByCPFRepository.execute(
+      newEmployee.cpf,
+    );
 
-    if (employeeByCpf) {
+    if (employeeByCPF && employeeByCPF.id != employeeById.id) {
       throw new AppError('Already exists an employee with this cpf', 400);
     }
 
-    const employeeUpdated = employeesRepository.create({
+    const employeeUpdated = await this.updateEmployeeRepository.execute(id, {
       name: newEmployee.name,
       type: newEmployee.type,
       email: newEmployee.email,
       cpf: newEmployee.cpf,
       password: employeeById.password,
-      id,
     });
-
-    await employeesRepository.save(employeeUpdated);
 
     return new ReturnEmployeeDTO(
       employeeUpdated.id,

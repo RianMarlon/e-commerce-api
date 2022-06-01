@@ -1,5 +1,9 @@
-import { FindByIdEmployeeController } from './find-by-id-controller';
+import { FindEmployeeByIdController } from './find-by-id-controller';
 
-const findByIdEmployeeController = new FindByIdEmployeeController();
+import { findEmployeeByIdService } from '../../../services/employees/find-by-id/main';
 
-export { findByIdEmployeeController };
+const findEmployeeByIdController = new FindEmployeeByIdController(
+  findEmployeeByIdService,
+);
+
+export { findEmployeeByIdController };
