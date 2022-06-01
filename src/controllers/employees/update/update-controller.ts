@@ -1,12 +1,14 @@
 import { Request, Response } from 'express';
 
-import { updateEmployeeService } from '../../../services/employees/update/main';
+import { UpdateEmployeeService } from '../../../services/employees/update/update-service';
 
 export class UpdateEmployeeController {
+  constructor(private readonly updateEmployeeService: UpdateEmployeeService) {}
+
   async handleRequest(request: Request, response: Response) {
     const { id } = request.params;
 
-    const employeeUpdated = await updateEmployeeService.execute(
+    const employeeUpdated = await this.updateEmployeeService.execute(
       id,
       request.body,
     );
