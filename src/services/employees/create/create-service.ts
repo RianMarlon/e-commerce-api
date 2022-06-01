@@ -1,10 +1,11 @@
 import { AppError } from '../../../errors/app-error';
+
 import { DataValidator } from '../../../utils/data-validator/data-validator';
-import { createHash } from '../../../utils/encrypt/encrypt';
 import { withoutCharacters } from '../../../utils/without-characters';
 
 import { Employee } from '../../../entities/employee-entity';
 
+import { IEncryptor } from '../../../utils/encryptor/interfaces/encryptor-interface';
 import { IFindEmployeeByEmailRepository } from '../../../repositories/employees/find-by-email/find-by-email-repository-interface';
 import { IFindEmployeeByCPFRepository } from '../../../repositories/employees/find-by-cpf/find-by-cpf-repository-interface';
 import { ICreateEmployeeRepository } from '../../../repositories/employees/create/create-repository-interface';
@@ -15,6 +16,7 @@ import { CreateEmployeeDTO } from './dto/create-dto';
 export class CreateEmployeeService {
   constructor(
     private readonly dataValidator: DataValidator,
+    private readonly encryptor: IEncryptor,
     private readonly findEmployeeByEmailRepository: IFindEmployeeByEmailRepository,
     private readonly findEmployeeByCPFRepository: IFindEmployeeByCPFRepository,
     private readonly createEmployeeRepository: ICreateEmployeeRepository,
@@ -28,7 +30,9 @@ export class CreateEmployeeService {
 
     employeeToCreate.email = employeeToCreate.email.toLocaleLowerCase();
     employeeToCreate.cpf = withoutCharacters(employeeToCreate.cpf);
-    employeeToCreate.password = await createHash(employeeToCreate.password);
+    employeeToCreate.password = await this.encryptor.createHash(
+      employeeToCreate.password,
+    );
 
     const employeeByEmail = await this.findEmployeeByEmailRepository.execute(
       employeeToCreate.email,

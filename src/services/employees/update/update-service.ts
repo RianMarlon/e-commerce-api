@@ -1,8 +1,7 @@
 import { AppError } from '../../../errors/app-error';
 
 import { DataValidator } from '../../../utils/data-validator/data-validator';
-import { compareDataWithHash } from '../../../utils/encrypt/encrypt';
-import { withoutCharacters } from '../../../utils/without-characters';
+import { IEncryptor } from '../../../utils/encryptor/interfaces/encryptor-interface';
 
 import { IFindEmployeeByEmailRepository } from '../../../repositories/employees/find-by-email/find-by-email-repository-interface';
 import { IFindEmployeeByCPFRepository } from '../../../repositories/employees/find-by-cpf/find-by-cpf-repository-interface';
@@ -15,6 +14,7 @@ import { UpdateEmployeeDTO } from './dto/update-dto';
 export class UpdateEmployeeService {
   constructor(
     private readonly dataValidator: DataValidator,
+    private readonly encryptor: IEncryptor,
     private readonly findEmployeeByIdRepository: IFindEmployeeByIdRepository,
     private readonly findEmployeeByEmailRepository: IFindEmployeeByEmailRepository,
     private readonly findEmployeeByCPFRepository: IFindEmployeeByCPFRepository,
@@ -36,7 +36,7 @@ export class UpdateEmployeeService {
       throw new AppError('Employee not exists', 404);
     }
 
-    const passwordIsValid = await compareDataWithHash(
+    const passwordIsValid = await this.encryptor.compareDataWithHash(
       employeeToUpdate.password,
       employeeById.password,
     );
@@ -49,9 +49,6 @@ export class UpdateEmployeeService {
       ...employeeById,
       ...employeeToUpdate,
     };
-
-    newEmployee.email = newEmployee.email.toLowerCase();
-    newEmployee.cpf = withoutCharacters(newEmployee.cpf);
 
     const employeeByEmail = await this.findEmployeeByEmailRepository.execute(
       newEmployee.email,
